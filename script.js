@@ -17,16 +17,23 @@ function init() {
 	createLights();
 
 	// add the objects
-	// createCard()
+	createCard();
 
-createSea();
+	// createSea();
+
+	createRay();
 
 	// start a loop that will update the objects' positions 
 	// and render the scene on each frame
 	loop();
+
+	console.log('init')
 }
 
-var scene, camera, fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH, renderer, container;
+var scene, camera, raycaster, fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH, renderer, container;
+
+var sceneObjects = [];
+
 
 function createScene() {
 	// Get the width and the height of the screen,
@@ -85,6 +92,9 @@ function createScene() {
 	// Listen to the screen: if the user resizes it
 	// we have to update the camera and the renderer size
 	window.addEventListener('resize', handleWindowResize, false);
+
+	console.log('scene created');
+
 }
 
 function handleWindowResize() {
@@ -130,58 +140,93 @@ function createLights() {
 	// to activate the lights, just add them to the scene
 	scene.add(hemisphereLight);  
 	scene.add(shadowLight);
+
+	console.log('lights created');			
+
 }
 
-// First let's define a Sea object :
-Sea = function(){
-	
-	// create the geometry (shape) of the cylinder;
-	// the parameters are: 
-	// radius top, radius bottom, height, number of segments on the radius, number of segments vertically
-	var geom = new THREE.CylinderGeometry(600,600,800,40,10);
-	
-	// rotate the geometry on the x axis
-	geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
-	
-	// create the material 
-	var mat = new THREE.MeshPhongMaterial({
-		color:Colors.blue,
-		transparent:true,
-		opacity:.6,
-		shading:THREE.FlatShading,
+Card = function(){
+	var geom = new THREE.BoxBufferGeometry(50,50,50);
+	var mat = new THREE.MeshLambertMaterial({
+		color: Math.random() * 0xffffff
 	});
 
-	// To create an object in Three.js, we have to create a mesh 
-	// which is a combination of a geometry and some material
-	this.mesh = new THREE.Mesh(geom, mat);
+	// geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
 
-	// Allow the sea to receive shadows
-	this.mesh.receiveShadow = true; 
+	this.mesh = new THREE.Mesh(geom, mat);
+	this.mesh.receiveShadow = true;
 }
 
-// Instantiate the sea and add it to the scene:
+var card;
 
-var sea;
+function createCard(){
+	card = new Card();
 
-function createSea(){
-	sea = new Sea();
+	card.mesh.position.y = 100;
 
-	// push it a little bit at the bottom of the scene
-	sea.mesh.position.y = -600;
+	scene.add(card.mesh);
 
-	// add the mesh of the sea to the scene
-	scene.add(sea.mesh);
+	sceneObjects.push(card.mesh);
+
+	console.log('card created');
+}
+
+var mouse = new THREE.Vector2(), INTERSECTED;
+
+function onMouseMove( event ) {
+	// calculate mouse position in normalized device coordinates
+	// (-1 to +1) for both components
+
+	console.log('moved');
+
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+}
+
+function createRay(){
+
+	console.log('raycaster created')
+
+	// Raycaster
+	raycaster = new THREE.Raycaster();
+	raycaster.setFromCamera( mouse, camera );
+
 }
 
 function loop(){
-	// Rotate the propeller, the sea and the sky
-	// airplane.propeller.rotation.x += 0.3;
-	// sea.mesh.rotation.z += .005;
-	// sky.mesh.rotation.z += .01;
+// console.log('intersects');
+
+	var intersects = raycaster.intersectObjects(scene.children);
+
+	if ( intersects.length > 0 ) {
+		if ( INTERSECTED != intersects[ 0 ].object ) {
+			console.log('intersects');
+			if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+			INTERSECTED = intersects[ 0 ].object;
+			INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+			INTERSECTED.material.emissive.setHex( 0xff0000 );
+		}
+	} else {
+		// console.log('intersects');
+		if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+		INTERSECTED = null;
+	}
+
+	card.mesh.rotation.x += .005;
+	card.mesh.rotation.y += .005;
 
 	// render the scene
 	renderer.render(scene, camera);
 
+	window.addEventListener( 'mousemove', onMouseMove, false );
+
 	// call the loop function again
 	requestAnimationFrame(loop);
+
 }
+
+
+
+
+
