@@ -190,13 +190,14 @@ function createRay(){
 
 	// Raycaster
 	raycaster = new THREE.Raycaster();
-	raycaster.setFromCamera( mouse, camera );
+
 
 }
 
 function loop(){
 // console.log('intersects');
 
+	raycaster.setFromCamera( mouse, camera );
 	var intersects = raycaster.intersectObjects(scene.children);
 
 	if ( intersects.length > 0 ) {
