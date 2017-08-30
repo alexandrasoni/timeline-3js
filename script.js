@@ -19,8 +19,9 @@ function init() {
 	// add the objects
 	createCard();
 
-	// createSea();
+	createPoint();
 
+	// add raycaster for mouse interaction
 	createRay();
 
 	// start a loop that will update the objects' positions 
@@ -146,12 +147,23 @@ function createLights() {
 }
 
 Card = function(){
-	var geom = new THREE.BoxBufferGeometry(50,50,50);
-	var mat = new THREE.MeshLambertMaterial({
-		color: Math.random() * 0xffffff
-	});
 
-	// geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
+	var geom = new THREE.BoxBufferGeometry(50,50,50);
+
+	// var squareGeometry  = new THREE.Geometry(); 
+	// squareGeometry.vertices.push(new THREE.Vector3(-1.0,  1.0, 0.0)); 
+	// squareGeometry.vertices.push(new THREE.Vector3( 1.0,  1.0, 0.0)); 
+	// squareGeometry.vertices.push(new THREE.Vector3( 1.0, -1.0, 0.0)); 
+	// squareGeometry.vertices.push(new THREE.Vector3(-1.0, -1.0, 0.0)); 
+	// squareGeometry.faces.push(new THREE.Face3(0, 1, 2)); 
+	// squareGeometry.faces.push(new THREE.Face3(0, 2, 3));
+
+	var cubeTexture = THREE.ImageUtils.loadTexture('textures/2.png');
+
+	var mat = new THREE.MeshLambertMaterial({
+		map: cubeTexture,
+		side:THREE.DoubleSide 
+	});
 
 	this.mesh = new THREE.Mesh(geom, mat);
 	this.mesh.receiveShadow = true;
@@ -166,40 +178,52 @@ function createCard(){
 
 	scene.add(card.mesh);
 
-	sceneObjects.push(card.mesh);
-
 	console.log('card created');
 }
 
 var mouse = new THREE.Vector2(), INTERSECTED;
 
 function onMouseMove( event ) {
+
 	// calculate mouse position in normalized device coordinates
 	// (-1 to +1) for both components
-
-	console.log('moved');
-
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
 }
 
+function createPoint() {
+
+	// var cubeTexture = THREE.ImageUtils.loadTexture('textures/txt.dds');
+
+	// var cubeMaterial = new THREE.MeshLambertMaterial({ map: cubeTexture });
+    // var img = new THREE.MeshBasicMaterial({ //CHANGED to MeshBasicMaterial
+    //     map:THREE.ImageUtils.loadTexture('textures/txt.dds')
+    // });
+    // img.map.needsUpdate = true; //ADDED
+
+    // // plane
+    // var plane = new THREE.Mesh(new THREE.PlaneGeometry(200, 200),img);
+    // plane.overdraw = true;
+    // scene.add(plane);
+}
+
+
+
 function createRay(){
 
-	console.log('raycaster created')
-
-	// Raycaster
+	// Create raycaster
 	raycaster = new THREE.Raycaster();
-
-
+	console.log('raycaster created')
 }
 
 function loop(){
-// console.log('intersects');
 
+	// Set raycaster
 	raycaster.setFromCamera( mouse, camera );
 	var intersects = raycaster.intersectObjects(scene.children);
 
+	// Check intersect
 	if ( intersects.length > 0 ) {
 		if ( INTERSECTED != intersects[ 0 ].object ) {
 			console.log('intersects');
@@ -209,7 +233,6 @@ function loop(){
 			INTERSECTED.material.emissive.setHex( 0xff0000 );
 		}
 	} else {
-		// console.log('intersects');
 		if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
 		INTERSECTED = null;
 	}
