@@ -148,15 +148,9 @@ function createLights() {
 
 Card = function(){
 
-	var geom = new THREE.BoxBufferGeometry(50,50,50);
+	// var geom = new THREE.BoxBufferGeometry(50,50,50);
 
-	// var squareGeometry  = new THREE.Geometry(); 
-	// squareGeometry.vertices.push(new THREE.Vector3(-1.0,  1.0, 0.0)); 
-	// squareGeometry.vertices.push(new THREE.Vector3( 1.0,  1.0, 0.0)); 
-	// squareGeometry.vertices.push(new THREE.Vector3( 1.0, -1.0, 0.0)); 
-	// squareGeometry.vertices.push(new THREE.Vector3(-1.0, -1.0, 0.0)); 
-	// squareGeometry.faces.push(new THREE.Face3(0, 1, 2)); 
-	// squareGeometry.faces.push(new THREE.Face3(0, 2, 3));
+	var geom = new THREE.PlaneGeometry( 50, 50, 32 );
 
 	var cubeTexture = THREE.ImageUtils.loadTexture('textures/2.png');
 
