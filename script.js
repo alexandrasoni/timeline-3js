@@ -18,8 +18,7 @@ function init() {
 
 	// add the objects
 	createCard();
-
-	createPoint();
+	createLine();
 
 	// add raycaster for mouse interaction
 	createRay();
@@ -150,7 +149,7 @@ Card = function(){
 
 	// var geom = new THREE.BoxBufferGeometry(50,50,50);
 
-	var geom = new THREE.PlaneGeometry( 50, 50, 32 );
+	var geom = new THREE.PlaneGeometry( 80, 80, 32 );
 
 	var cubeTexture = THREE.ImageUtils.loadTexture('textures/2.png');
 
@@ -163,17 +162,46 @@ Card = function(){
 	this.mesh.receiveShadow = true;
 }
 
+Line = function(){
+
+	var geom = new THREE.Geometry();
+	geom.vertices.push(
+		new THREE.Vector3( 0, 125, -1 ),
+		new THREE.Vector3( 0, -100, -1 )
+	);
+
+	var mat = new THREE.LineBasicMaterial({
+		color: 0xffffff
+	});
+
+	this.mesh = new THREE.Line(geom, mat);
+
+}
+
 var card;
 
 function createCard(){
 	card = new Card();
 
-	card.mesh.position.y = 100;
+	card.mesh.position.y = 150;
 
 	scene.add(card.mesh);
+	sceneObjects.push(card.mesh);
 
 	console.log('card created');
 }
+
+var line;
+
+function createLine(){
+	line = new Line();
+
+	line.mesh.position.y = 75;
+	scene.add(line.mesh);
+
+	console.log('line created');
+}
+
 
 var mouse = new THREE.Vector2(), INTERSECTED;
 
@@ -186,24 +214,6 @@ function onMouseMove( event ) {
 
 }
 
-function createPoint() {
-
-	// var cubeTexture = THREE.ImageUtils.loadTexture('textures/txt.dds');
-
-	// var cubeMaterial = new THREE.MeshLambertMaterial({ map: cubeTexture });
-    // var img = new THREE.MeshBasicMaterial({ //CHANGED to MeshBasicMaterial
-    //     map:THREE.ImageUtils.loadTexture('textures/txt.dds')
-    // });
-    // img.map.needsUpdate = true; //ADDED
-
-    // // plane
-    // var plane = new THREE.Mesh(new THREE.PlaneGeometry(200, 200),img);
-    // plane.overdraw = true;
-    // scene.add(plane);
-}
-
-
-
 function createRay(){
 
 	// Create raycaster
@@ -215,7 +225,7 @@ function loop(){
 
 	// Set raycaster
 	raycaster.setFromCamera( mouse, camera );
-	var intersects = raycaster.intersectObjects(scene.children);
+	var intersects = raycaster.intersectObjects(sceneObjects);
 
 	// Check intersect
 	if ( intersects.length > 0 ) {
@@ -225,14 +235,24 @@ function loop(){
 			INTERSECTED = intersects[ 0 ].object;
 			INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
 			INTERSECTED.material.emissive.setHex( 0xff0000 );
+			// function turnCard(){
+			// 	card.mesh.scale.y += .1;
+			// 	card.mesh.scale.x += .1;
+			// }
+			// requestAnimationFrame(turnCard);
+			var tween = createjs.Tween.get(INTERSECTED.position)
+			    .to({x:110},400)
+			 
 		}
 	} else {
 		if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
 		INTERSECTED = null;
+		// card.mesh.scale.y -= .5;
+		// card.mesh.scale.x -= .5;
 	}
 
-	card.mesh.rotation.x += .005;
-	card.mesh.rotation.y += .005;
+	// card.mesh.rotation.x += .005;
+	// card.mesh.rotation.y += .005;
 
 	// render the scene
 	renderer.render(scene, camera);
