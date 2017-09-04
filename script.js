@@ -17,8 +17,12 @@ function init() {
 	createLights();
 
 	// add the objects
-	createCard();
+	createCard(0, 150, 1);
+	createCard(-30, 120, 2);
+
 	createLine();
+
+	createCardGroup()
 
 	// add raycaster for mouse interaction
 	createRay();
@@ -145,6 +149,8 @@ function createLights() {
 
 }
 
+
+// Card model
 Card = function(){
 
 	// var geom = new THREE.BoxBufferGeometry(50,50,50);
@@ -162,6 +168,7 @@ Card = function(){
 	this.mesh.receiveShadow = true;
 }
 
+// Line model
 Line = function(){
 
 	var geom = new THREE.Geometry();
@@ -171,26 +178,45 @@ Line = function(){
 	);
 
 	var mat = new THREE.LineBasicMaterial({
-		color: 0xffffff
+		color: 0x333333,
+		opacity: 0.1
 	});
 
 	this.mesh = new THREE.Line(geom, mat);
 
 }
 
+// Create card group
+var group = new THREE.Object3D();
+
+function createCardGroup() {
+	// Add to scene
+	scene.add(group);
+
+	// Push to mouse intersection object group
+	sceneObjects.push(group.children[0]);
+	sceneObjects.push(group.children[1]);
+}
+
+// Create card function
 var card;
 
-function createCard(){
+function createCard(x, y, z){
 	card = new Card();
 
-	card.mesh.position.y = 150;
+	// Set position parameters
+	card.mesh.position.x = x;
+	card.mesh.position.y = y;
+	card.mesh.position.z = z;
 
-	scene.add(card.mesh);
-	sceneObjects.push(card.mesh);
+	// Add card to group
+	group.add(card.mesh);
 
 	console.log('card created');
 }
 
+
+// Create line function
 var line;
 
 function createLine(){
@@ -202,9 +228,25 @@ function createLine(){
 	console.log('line created');
 }
 
+// Create raycaster
+function createRay(){
+	raycaster = new THREE.Raycaster();
+	console.log('raycaster created')
+}
 
+// Create mouse object
 var mouse = new THREE.Vector2(), INTERSECTED;
+var intersectedObjects = [];
 
+
+	var currentPosX1 = sceneObjects[0].position.x
+	var currentPosY1 = sceneObjects[0].position.x
+
+	var currentPosX2;
+	var currentPosY2;
+	console.log(sceneObjects);
+
+// Mouse move event
 function onMouseMove( event ) {
 
 	// calculate mouse position in normalized device coordinates
@@ -212,47 +254,62 @@ function onMouseMove( event ) {
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-}
-
-function createRay(){
-
-	// Create raycaster
-	raycaster = new THREE.Raycaster();
-	console.log('raycaster created')
-}
-
-function loop(){
-
 	// Set raycaster
 	raycaster.setFromCamera( mouse, camera );
 	var intersects = raycaster.intersectObjects(sceneObjects);
 
-	// Check intersect
-	if ( intersects.length > 0 ) {
-		if ( INTERSECTED != intersects[ 0 ].object ) {
-			console.log('intersects');
-			if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-			INTERSECTED = intersects[ 0 ].object;
-			INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-			INTERSECTED.material.emissive.setHex( 0xff0000 );
-			// function turnCard(){
-			// 	card.mesh.scale.y += .1;
-			// 	card.mesh.scale.x += .1;
-			// }
-			// requestAnimationFrame(turnCard);
-			var tween = createjs.Tween.get(INTERSECTED.position)
-			    .to({x:110},400)
-			 
-		}
-	} else {
-		if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-		INTERSECTED = null;
-		// card.mesh.scale.y -= .5;
-		// card.mesh.scale.x -= .5;
-	}
 
-	// card.mesh.rotation.x += .005;
-	// card.mesh.rotation.y += .005;
+
+	console.log('intersects');
+	if (intersects.length > 0) {
+		for ( var i = 0; i < intersects.length; i++ ) {
+			intersects[ i ].object.material.color.set( 0xff0000 );
+			// console.log(intersects[i])
+			intersectedObjects.push(intersects[i].object);
+			var pos = intersects[i].object.position;
+			var currentPosX = pos.x;
+			var currentPosY = pos.y;
+
+			TweenMax.to(pos, 1, {y: currentPosY + Math.random()*30, x: currentPosX + Math.random()*30, repeat: 1, yoyo: true});
+		}
+	}
+    else {
+    	console.log(currentPosY);
+		for ( var i = 0; i < intersectedObjects.length; i++ ) {
+			// TweenMax.to(intersectedObjects[i].position, 1, {y: 30, x: 30, repeat: 1, yoyo: true});
+		}
+    }
+
+  	// console.log(intersectedObjects);
+
+	renderer.render( scene, camera );
+
+	// Check intersect
+	// if ( intersects.length > 0 ) {
+	// 	if ( INTERSECTED != intersects[ 0 ].object ) {
+	// 		console.log('intersects');
+	// 		if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+	// 		INTERSECTED = intersects[ 0 ].object;
+	// 		INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+	// 		INTERSECTED.material.emissive.setHex( 0xff0000 );
+
+	// 		var pos = INTERSECTED.position;
+	// 		var currentPosX = pos.x;
+	// 		var currentPosY = pos.y;
+	// 		TweenMax.to(pos, 1, {y: currentPosY + Math.random()*30, x: currentPosX + Math.random()*30});
+			 
+	// 	}
+	// } else {
+	// 	if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+	// 	INTERSECTED = null;
+
+	// 	TweenMax.to(card.mesh.position, 1, {y: 150, x: 0});
+	// }
+
+}
+
+// Loop the render
+function loop(){
 
 	// render the scene
 	renderer.render(scene, camera);
