@@ -258,8 +258,6 @@ function onMouseMove( event ) {
 	raycaster.setFromCamera( mouse, camera );
 	var intersects = raycaster.intersectObjects(sceneObjects);
 
-
-
 	console.log('intersects');
 	if (intersects.length > 0) {
 		for ( var i = 0; i < intersects.length; i++ ) {
@@ -270,13 +268,13 @@ function onMouseMove( event ) {
 			var currentPosX = pos.x;
 			var currentPosY = pos.y;
 
-			TweenMax.to(pos, 1, {y: currentPosY + Math.random()*30, x: currentPosX + Math.random()*30, repeat: 1, yoyo: true});
+			TweenMax.to(pos, 1, {y: currentPosY + Math.random()*30, x: currentPosX + Math.random()*30});
 		}
 	}
     else {
     	console.log(currentPosY);
 		for ( var i = 0; i < intersectedObjects.length; i++ ) {
-			// TweenMax.to(intersectedObjects[i].position, 1, {y: 30, x: 30, repeat: 1, yoyo: true});
+			TweenMax.to(intersectedObjects[i].position, 1, {y: 30, x: 30});
 		}
     }
 
